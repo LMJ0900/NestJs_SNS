@@ -64,4 +64,20 @@ export class AuthService {
             refreshToken: this.signToken(user, true),
         }
     }
+
+    async authenticateWithEmailAndPassword(user: Pick<UsersModel, 'email' | 'password'>){
+        const existingUser = await this.usersService.getUserByEmail(user.email);
+
+        if(!existingUser){
+            throw new UnauthorizedException('존재하지 않는 사용자입니다.')
+        }
+
+        const passwordCheck = await bcrypt.compare(user.password, existingUser.password);
+
+        if(!passwordCheck){
+            throw new UnauthorizedException('비밀번호가 틀렸습니다.')
+        }
+
+        return existingUser;
+    }
 }
